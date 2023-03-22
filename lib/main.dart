@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 void main() => runApp(const MyApp());
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  const MyApp({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHome extends StatefulWidget {
-  const MyHome({super.key});
+  const MyHome({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
@@ -34,6 +34,50 @@ class MyHomeState extends State<MyHome> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final List<String> _tasks = [];
   final List<bool> _checkBoxValues = [];
+  void _showEditDialog(int index) {
+    TextEditingController editingController =
+        TextEditingController(text: _tasks[index]);
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Editar tarefa'),
+          content: TextFormField(
+            controller: editingController,
+            decoration: const InputDecoration(
+              hintText: 'Insira o texto da tarefa aqui',
+            ),
+            validator: (value) {
+              if (value!.trim().isEmpty) {
+                return 'O campo da tarefa é obrigatório';
+              }
+              return null;
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancelar'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: const Text('Salvar'),
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  setState(() {
+                    _tasks[index] = editingController.text;
+                  });
+                  Navigator.of(context).pop();
+                }
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -114,6 +158,12 @@ class MyHomeState extends State<MyHome> {
                                 _tasks.removeAt(index);
                                 _checkBoxValues.removeAt(index);
                               });
+                            },
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              _showEditDialog(index);
                             },
                           )
                         ],
